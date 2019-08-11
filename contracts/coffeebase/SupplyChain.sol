@@ -64,7 +64,7 @@ contract SupplyChain is Ownable, AccessControl  {
   event ForSale(uint upc,uint price);
   event Sold(uint upc,address distributorID);
   event Shipped(uint upc);
-  event Received(uint upc);
+  event Received(uint upc,address retailerID);
   event Purchased(uint upc);
 
   // Define a modifer that checks to see if msg.sender == owner of the contract
@@ -290,12 +290,17 @@ contract SupplyChain is Ownable, AccessControl  {
   // Use the above modifiers to check if the item is shipped
   function receiveItem(uint _upc) public 
     // Call modifier to check if upc has passed previous supply chain stage
-    
+    shipped(_upc) 
     // Access Control List enforced by calling Smart Contract / DApp
+    onlyRetailer
     {
     // Update the appropriate fields - ownerID, retailerID, itemState
+      items[_upc].ownerID = msg.sender;
+      items[_upc].retailerID = msg.sender;
+      items[_upc].itemState = State.Received;
     
     // Emit the appropriate event
+    emit Received(_upc,msg.sender);
     
   }
 

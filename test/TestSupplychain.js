@@ -45,7 +45,9 @@ contract('SupplyChain', function(accounts) {
     let supplyChain;
     beforeEach(async () => {
       supplyChain = await SupplyChain.new();
-      await supplyChain.addFarmer(accounts[1]);
+      await supplyChain.addFarmer(originFarmerID);
+      await supplyChain.addRetailer(retailerID);
+      await supplyChain.addConsumer(consumerID);
     });
 
     // 1st Test
@@ -234,22 +236,35 @@ contract('SupplyChain', function(accounts) {
     })    
 
     // 7th Test
-    xit("Testing smart contract function receiveItem() that allows a retailer to mark coffee received", async() => {
-        const supplyChain = await SupplyChain.deployed()
+    it("Testing smart contract function receiveItem() that allows a retailer to mark coffee received", async() => {
+        await supplyChain.harvestItem(upc, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
+        await supplyChain.processItem(upc, {from: originFarmerID});
+        await supplyChain.packItem(upc,{from: originFarmerID});
+        let priceInWei = web3.utils.toWei('1', 'ether');
+        await supplyChain.sellItem(upc,priceInWei,{from: originFarmerID});
+        await supplyChain.buyItem(upc,{from: distributorID, value: web3.utils.toWei('2','ether')});
+        await supplyChain.shipItem(upc);
         
         // Declare and Initialize a variable for event
+        let eventEmitted = false ;
         
+        
+        // Mark an item as Received by calling function receiveItem()
+        tx = await supplyChain.receiveItem(upc,{from: retailerID});
         
         // Watch the emitted event Received()
-        
-
-        // Mark an item as Sold by calling function buyItem()
-        
+        eventEmitted = tx.logs[0].event == 'Received' ? true : false;
 
         // Retrieve the just now saved item from blockchain by calling function fetchItem()
+        const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
+        const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc);
         
 
         // Verify the result set
+        assert.equal(resultBufferTwo[5], 7, 'Error: Invalid item State');
+        assert.equal(eventEmitted, true, 'Invalid event emitted');
+        assert.equal(resultBufferOne[2],retailerID,"OwnerID did not change correctly");
+        assert.equal(resultBufferTwo[7],retailerID,"retailedID did not change correctly");
              
     })    
 
