@@ -1,5 +1,7 @@
 const path = require("path");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const devMode = process.env.NODE_ENV !== 'production';
 
 module.exports = {
   mode: 'development',
@@ -8,8 +10,22 @@ module.exports = {
     filename: "index.js",
     path: path.resolve(__dirname, "dist"),
   },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          'style-loader',
+          'css-loader'
+        ]
+      }
+    ]
+  },
   plugins: [
-    new CopyWebpackPlugin([{ from: "./src/index.html", to: "index.html" }]),
+    new CleanWebpackPlugin(),
+    new HtmlWebpackPlugin({
+      template: path.join(__dirname,'src/index.html')
+    })
   ],
   devServer: { contentBase: path.join(__dirname, "dist"), compress: true },
 };
