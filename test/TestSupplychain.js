@@ -168,7 +168,7 @@ contract('SupplyChain', function(accounts) {
         let balanceFarmerBeforeBN = web3.utils.toBN(balanceFarmerBefore);
         let tx = await supplyChain.buyItem(upc,{from: distributorID, value: web3.utils.toWei('2','ether')});
 
-        console.log(tx.receipt.gasUsed);
+        // console.log(tx.receipt.gasUsed);
         eventEmitted = tx.logs[0].event == 'Sold' ? true : false;
 
         // Retrieve the just now saved item from blockchain by calling function fetchItem()
@@ -185,12 +185,15 @@ contract('SupplyChain', function(accounts) {
         let balanceDistributorAfterBN = web3.utils.toBN(balanceDistributorAfter);
         let balanceFarmerAfter = await web3.eth.getBalance(originFarmerID);
         let balanceFarmerAfterBN = web3.utils.toBN(balanceFarmerAfter);
+
+        
         let gasUsedBN = new web3.utils.BN(tx.receipt.gasUsed);
         let gasPrice = await web3.eth.getGasPrice();
         gasPrice = web3.utils.toBN(gasPrice);
         let gasCost = gasUsedBN.mul(gasPrice);
         let productPrice = resultBufferTwo[4];
-        let totalCostBN =  productPrice.add(gasCost); //productPrice.add(gasUsedBN);
+        let totalCostBN =  productPrice.add(gasCost); 
+
         let remBalance = balanceDistributorBeforeBN.sub(totalCostBN);
         let balanceFarmerExpectedBN = balanceFarmerBeforeBN.add(productPrice)
          
@@ -202,22 +205,31 @@ contract('SupplyChain', function(accounts) {
     })    
 
     // 6th Test
-    xit("Testing smart contract function shipItem() that allows a distributor to ship coffee", async() => {
-        const supplyChain = await SupplyChain.deployed()
+    it("Testing smart contract function shipItem() that allows a distributor to ship coffee", async() => {
+        await supplyChain.harvestItem(upc, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
+        await supplyChain.processItem(upc, {from: originFarmerID});
+        await supplyChain.packItem(upc,{from: originFarmerID});
+        let priceInWei = web3.utils.toWei('1', 'ether');
+        await supplyChain.sellItem(upc,priceInWei,{from: originFarmerID});
+        await supplyChain.buyItem(upc,{from: distributorID, value: web3.utils.toWei('2','ether')});
         
         // Declare and Initialize a variable for event
+        let eventEmitted = false 
+
+        // Mark an item as Shipped by calling function shipItem()
+        let tx = await supplyChain.shipItem(upc);
         
         
         // Watch the emitted event Shipped()
-        
-
-        // Mark an item as Sold by calling function buyItem()
-        
+        eventEmitted = tx.logs[0].event == 'Shipped' ? true : false;
 
         // Retrieve the just now saved item from blockchain by calling function fetchItem()
+        const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc);
         
 
         // Verify the result set
+        assert.equal(resultBufferTwo[5], 6, 'Error: Invalid item State');
+        assert.equal(eventEmitted, true, 'Invalid event emitted')        
               
     })    
 
