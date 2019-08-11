@@ -65,7 +65,7 @@ contract SupplyChain is Ownable, AccessControl  {
   event Sold(uint upc,address distributorID);
   event Shipped(uint upc);
   event Received(uint upc,address retailerID);
-  event Purchased(uint upc);
+  event Purchased(uint upc, address purchaserID);
 
   // Define a modifer that checks to see if msg.sender == owner of the contract
   // modifier onlyOwner() {
@@ -170,6 +170,7 @@ contract SupplyChain is Ownable, AccessControl  {
 
   // Define a function 'harvestItem' that allows a farmer to mark an item 'Harvested'
   function harvestItem(uint _upc,
+    uint _productID,
     address _originFarmerID,
     string memory _originFarmName,
     string memory _originFarmInformation,
@@ -184,6 +185,7 @@ contract SupplyChain is Ownable, AccessControl  {
     // Add the new item as part of Harvest
     items[_upc].upc = _upc;
     items[_upc].sku = sku;
+    items[_upc].productID = _productID;
     items[_upc].originFarmerID = _originFarmerID;
     items[_upc].ownerID = _originFarmerID;
     items[_upc].originFarmName = _originFarmName;
@@ -308,12 +310,18 @@ contract SupplyChain is Ownable, AccessControl  {
   // Use the above modifiers to check if the item is received
   function purchaseItem(uint _upc) public 
     // Call modifier to check if upc has passed previous supply chain stage
+    received(_upc)
     
     // Access Control List enforced by calling Smart Contract / DApp
+    onlyConsumer
     {
     // Update the appropriate fields - ownerID, consumerID, itemState
+      items[_upc].ownerID = msg.sender;
+      items[_upc].consumerID = msg.sender;
+      items[_upc].itemState = State.Purchased;
     
     // Emit the appropriate event
+    emit Purchased(_upc,msg.sender);
     
   }
 
