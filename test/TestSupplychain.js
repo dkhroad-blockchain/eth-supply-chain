@@ -45,7 +45,7 @@ contract('SupplyChain', function(accounts) {
         var eventEmitted = false
 
         // Mark an item as Harvested by calling function harvestItem()
-      let result = await supplyChain.harvestItem(upc, productID, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
+      let result = await supplyChain.harvestItem(upc, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
         eventEmitted = result.logs[0].event == 'Harvested' ? true: false;
 
         // Retrieve the just now saved item from blockchain by calling function fetchItem()
@@ -67,7 +67,7 @@ contract('SupplyChain', function(accounts) {
 
     // 2nd Test
     it("Testing smart contract function processItem() that allows a farmer to process coffee", async() => {
-        await supplyChain.harvestItem(upc, productID, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
+        await supplyChain.harvestItem(upc, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
         // Declare and Initialize a variable for event
         let eventEmitted = false;
         
@@ -97,7 +97,7 @@ contract('SupplyChain', function(accounts) {
     // 3rd Test
     it("Testing smart contract function packItem() that allows a farmer to pack coffee", async() => {
         // setup 
-        await supplyChain.harvestItem(upc, productID, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
+        await supplyChain.harvestItem(upc, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
         await supplyChain.processItem(upc, {from: originFarmerID});
 
         // Declare and Initialize a variable for event
@@ -118,7 +118,7 @@ contract('SupplyChain', function(accounts) {
 
     // 4th Test
     it("Testing smart contract function sellItem() that allows a farmer to sell coffee", async() => {
-        await supplyChain.harvestItem(upc, productID, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
+        await supplyChain.harvestItem(upc, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
         await supplyChain.processItem(upc, {from: originFarmerID});
         await supplyChain.packItem(upc,{from: originFarmerID});
         
@@ -142,7 +142,7 @@ contract('SupplyChain', function(accounts) {
 
     // 5th Test
     it("Testing smart contract function buyItem() that allows a distributor to buy coffee", async() => {
-        await supplyChain.harvestItem(upc, productID, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
+        await supplyChain.harvestItem(upc, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
         await supplyChain.processItem(upc, {from: originFarmerID});
         await supplyChain.packItem(upc,{from: originFarmerID});
         let priceInWei = web3.utils.toWei('1', 'ether');
@@ -198,7 +198,7 @@ contract('SupplyChain', function(accounts) {
 
     // 6th Test
     it("Testing smart contract function shipItem() that allows a distributor to ship coffee", async() => {
-        await supplyChain.harvestItem(upc, productID, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
+        await supplyChain.harvestItem(upc, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
         await supplyChain.processItem(upc, {from: originFarmerID});
         await supplyChain.packItem(upc,{from: originFarmerID});
         let priceInWei = web3.utils.toWei('1', 'ether');
@@ -227,7 +227,7 @@ contract('SupplyChain', function(accounts) {
 
     // 7th Test
     it("Testing smart contract function receiveItem() that allows a retailer to mark coffee received", async() => {
-        await supplyChain.harvestItem(upc, productID, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
+        await supplyChain.harvestItem(upc, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
         await supplyChain.processItem(upc, {from: originFarmerID});
         await supplyChain.packItem(upc,{from: originFarmerID});
         let priceInWei = web3.utils.toWei('1', 'ether');
@@ -260,7 +260,7 @@ contract('SupplyChain', function(accounts) {
 
     // 8th Test
     it("Testing smart contract function purchaseItem() that allows a consumer to purchase coffee", async() => {
-        await supplyChain.harvestItem(upc, productID, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
+        await supplyChain.harvestItem(upc, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
         await supplyChain.processItem(upc, {from: originFarmerID});
         await supplyChain.packItem(upc,{from: originFarmerID});
         let priceInWei = web3.utils.toWei('1', 'ether');
@@ -294,7 +294,7 @@ contract('SupplyChain', function(accounts) {
     // 9th Test
     it("Testing smart contract function fetchItemBufferOne() that allows anyone to fetch item details from blockchain", async() => {
 
-        await supplyChain.harvestItem(upc, productID, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
+        await supplyChain.harvestItem(upc, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
 
         // Retrieve the just now saved item from blockchain by calling function fetchItem()
         const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc,{from: accounts[5]});
@@ -317,7 +317,7 @@ contract('SupplyChain', function(accounts) {
     it("Testing smart contract function fetchItemBufferTwo() that allows anyone to fetch item details from blockchain", async() => {
 
         
-        await supplyChain.harvestItem(upc, productID, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
+        await supplyChain.harvestItem(upc, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes,{from: originFarmerID})
         await supplyChain.processItem(upc, {from: originFarmerID});
         await supplyChain.packItem(upc,{from: originFarmerID});
         await supplyChain.sellItem(upc,productPrice,{from: originFarmerID});

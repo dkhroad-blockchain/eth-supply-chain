@@ -58,14 +58,14 @@ contract SupplyChain is Ownable, AccessControl  {
   }
 
   // Define 8 events with the same 8 state values and accept 'upc' as input argument
-  event Harvested(uint upc);
-  event Processed(uint upc);
-  event Packed(uint upc);
-  event ForSale(uint upc,uint price);
-  event Sold(uint upc,address distributorID);
-  event Shipped(uint upc);
-  event Received(uint upc,address retailerID);
-  event Purchased(uint upc, address purchaserID);
+  event Harvested(uint indexed upc);
+  event Processed(uint indexed upc);
+  event Packed(uint indexed upc);
+  event ForSale(uint indexed upc,uint price);
+  event Sold(uint indexed upc,address distributorID);
+  event Shipped(uint indexed upc);
+  event Received(uint indexed upc,address retailerID);
+  event Purchased(uint indexed upc, address purchaserID);
 
   // Define a modifer that checks to see if msg.sender == owner of the contract
   // modifier onlyOwner() {
@@ -94,13 +94,14 @@ contract SupplyChain is Ownable, AccessControl  {
     msg.sender.transfer(amountToReturn);
   }
 
+
   modifier onlyItemOwnerOrOwner(uint _upc) {
     require(items[_upc].ownerID == msg.sender || isOwner(),"caller is not the owner of the item");
     _;
   }
 
   modifier newitem(uint _upc) {
-    require(items[_upc].itemState == State.New);
+    require(items[_upc].itemState == State.New,"item already exists");
     _;
   }
   // Define a modifier that checks if an item.state of a upc is Harvested
@@ -170,7 +171,6 @@ contract SupplyChain is Ownable, AccessControl  {
 
   // Define a function 'harvestItem' that allows a farmer to mark an item 'Harvested'
   function harvestItem(uint _upc,
-    uint _productID,
     address _originFarmerID,
     string memory _originFarmName,
     string memory _originFarmInformation,
@@ -185,7 +185,7 @@ contract SupplyChain is Ownable, AccessControl  {
     // Add the new item as part of Harvest
     items[_upc].upc = _upc;
     items[_upc].sku = sku;
-    items[_upc].productID = _productID;
+    items[_upc].productID = sku + _upc;
     items[_upc].originFarmerID = _originFarmerID;
     items[_upc].ownerID = _originFarmerID;
     items[_upc].originFarmName = _originFarmName;
