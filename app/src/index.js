@@ -489,6 +489,12 @@ const App = {
     var events = this.meta.events.allEvents(function(err, log){
       if (!err) {
         $("#ftc-events").append('<li>' + log.event + ' - ' + log.transactionHash + '</li>');
+        if (log.event == "FarmerAdded" ||
+					 	log.event == 'DistributorAdded' || 
+					 	log.event == 'ConsumerAdded' || 
+						log.event == 'RetailerAdded') {
+          $("#ftc-roles-events").append('<li>' + log.event + ' - ' + log.returnValues.account +  '</li>');
+				}
       } else {
         console.log("fetchEvents: ",err);
       }

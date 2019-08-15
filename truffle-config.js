@@ -19,10 +19,9 @@
  */
 
 const HDWalletProvider = require('truffle-hdwallet-provider');
+require('dotenv').config()
 const RINKEBY_KEY = process.env.RINKEBY_KEY || "UnknownKey"; 
 const mnemonic = process.env.MNEMONIC || "";
-
-
 
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
