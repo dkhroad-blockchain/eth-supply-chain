@@ -28,8 +28,8 @@ const App = {
 
       // get accounts
       const accounts = await web3.eth.getAccounts();
+      await this.fetchPastRoleEvents();
       
-      // this.refreshBalance();
       await this.setOwners(accounts);
       this.setForm();
       this.readForm();
@@ -78,41 +78,88 @@ const App = {
         break;
       case 10:
         return await App.fetchItemBufferTwo();
-        break
+        break;
+      case 11:
+        let farmerID = $("#originFarmerIDInput").val();
+        if (await App.addRole("Farmer",farmerID)) {
+          App.originFarmerID = farmerID;
+          $("#originFarmerID").val(farmerID);
+        }
+        break;
+      case 12:
+        let distributorID = $("#distributorIDInput").val();
+        if (await App.addRole("Distributor",distributorID)) {
+          App.distributorID = distributorID;
+          $("#distributorID").val(distributorID);
+        }
+        break;
+      case 13:
+        let retailerID = $("#retailerIDInput").val();
+        if (await App.addRole("Retailer",retailerID)) {
+          App.retailerID = retailerID;
+          $("#retailerID").val(retailerID);
+        }
+        break;
+      case 14:
+        let consumerID = $("#consumerIDInput").val();
+        if (await App.addRole("Consumer",consumerID)) {
+          App.consumerID = consumerID;
+          $("#consumerID").val(consumerID);
+        }
+        break;
     }
   },
 
   setOwners: async function(accounts) {
     this.admin = accounts[0];
-    this.originFarmerID = accounts[1];
-    this.distributorID = accounts[2];
-    this.retailerID = accounts[3];
-    this.consumerID = accounts[4];
-    const {addFarmer,addDistributor,addRetailer,addConsumer} = this.meta.methods;
-    let result;
-    try {
-      result = await addFarmer(this.originFarmerID).send({from: this.admin});
-      console.log("addFarmer: ",result);
-    } catch(error) {
-      console.log("addFarmer: ",error);
+	  if (window.ethereum || accounts.length == 1) {
+			// metamask exposes only one account 
+    } else { 
+      if (await this.addRole("Farmer",accounts[1])) {
+			  this.originFarmerID = accounts[1];
+      }
+      if (await this.addRole("Distributor",accounts[3])) {
+        this.distributorID = accounts[2];
+      }
+      if (await this.addRole("Retailer",accounts[3])) {
+        this.retailerID = accounts[3];
+      }
+      if (await this.addRole("consumer",accounts[4])) {
+        this.retailerID = accounts[4];
+      }
     }
+	},
 
-    try {
-      result = await addRetailer(this.retailerID).send({from: this.admin});
-      console.log("addRetailer: ",result);
-    } catch (error) {
-      console.log("addRetailer: ",error);
-    }
-
-    try {
-      result = await addConsumer(this.consumerID).send({from: this.admin});
-      console.log("addConsumer: ",result);
-    }catch(error) {
-      console.log("addConsumer: ",error);
-    }
-
-
+	addRole: async function(role,account) {
+			let result;
+			const {addFarmer,addDistributor,addRetailer,addConsumer} = this.meta.methods;
+      let addRoleFunc;
+			switch (role) {
+        case "Farmer":
+          addRoleFunc = addFarmer;
+          break;
+        case "Distributor":
+          addRoleFunc = addDistributor;
+          break;
+        case "Retailer":
+          addRoleFunc = addRetailer;
+          break;
+        case "Consumer":
+          addRoleFunc = addConsumer;
+          break;
+        
+			};	
+			try {
+				result = await addRoleFunc(account).send({from: this.admin});
+				console.log("addRole:",role,result);
+				return true;
+				
+			} catch(error) {
+				console.log("addRole: ",role,error);
+				return false;
+			}
   },
+
   setForm: function() {
     $("#ownerID").val(this.admin); 
     $("#originFarmerID").val(this.originFarmerID); 
@@ -152,26 +199,7 @@ const App = {
       App.consumerID
     );
   },
-  refreshBalance: async function() {
-    const { getBalance } = this.meta.methods;
-    const balance = await getBalance(this.account).call();
 
-    const balanceElement = document.getElementsByClassName("balance")[0];
-    balanceElement.innerHTML = balance;
-  },
-
-  sendCoin: async function() {
-    const amount = parseInt(document.getElementById("amount").value);
-    const receiver = document.getElementById("receiver").value;
-
-    this.setStatus("Initiating transaction... (please wait)");
-
-    const { sendCoin } = this.meta.methods;
-    await sendCoin(receiver, amount).send({ from: this.account });
-
-    this.setStatus("Transaction complete!");
-    this.refreshBalance();
-  },
 
   harvestItem: async function(event) {  
     event.preventDefault();
@@ -183,7 +211,7 @@ const App = {
     try {
       result = await harvestItem(
         App.upc,
-        App.ownerID,
+        App.originFarmerID,
         App.originFarmName,
         App.originFarmInformation,
         App.originFarmLatitude,
@@ -353,7 +381,7 @@ const App = {
     }
     */
     $("#ftc-item").text(JSON.stringify(result));
-    this.fetchPastEvents(App.upc);
+    this.fetchPastItemEvents(App.upc);
   },
 
   fetchItemBufferTwo: async function() {
@@ -400,16 +428,50 @@ const App = {
     // $("#ftc-item").text(JSON.stringify(result));
   },
 
-  fetchPastEvents: async function(upc) {
-    // There appears to be an bug in web3
-    // filtering doesn't work when 'allEvents' is specified
-    let events
+  fetchPastRoleEvents: async function(upc) {
+    let allEvents,events;
     try {
-      events = await this.meta.getPastEvents(
+      allEvents = await this.meta.getPastEvents(
         "allEvents", {fromBlock: 0 }
       );
 
-      events = events.filter((ev) => ev.returnValues.upc == upc);
+      allEvents.forEach((log,idx) => {
+        if (log.event == 'TransferOwnership') {
+          $("#ftc-roles-events").append('<li>' + log.event + ' - '  + log.returnValues.newOwner + '</li>');
+          this.admin = log.returnValues.newOwner;
+        }
+        if (log.event == "FarmerAdded") {
+          $("#ftc-roles-events").append('<li>' + log.event + ' - ' + log.returnValues.account +  '</li>');
+          this.originFarmerID = log.returnValues.account;
+        }
+        if (log.event == "DistributorAdded") {
+          $("#ftc-roles-events").append('<li>' + log.event + ' - ' + log.returnValues.account +  '</li>');
+          this.distributorID = log.returnValues.account;
+        }
+        if (log.event == "RetailerAdded") {
+          $("#ftc-roles-events").append('<li>' + log.event + ' - ' + log.returnValues.account +  '</li>');
+          this.retailerID = log.returnValues.account;
+        }
+        if (log.event == "ConsumerAdded") {
+          $("#ftc-roles-events").append('<li>' + log.event + ' - ' + log.returnValues.account +  '</li>');
+          this.consumerID = log.returnValues.account;
+        }
+        
+      });
+    }catch(error) {
+      console.log("fetchPastRoleEvents: ",error);
+    }
+  },
+
+  fetchPastItemEvents: async function(upc) {
+    // There appears to be an bug in web3
+    // filtering doesn't work when 'allEvents' is specified
+    let allEvents,events;
+    try {
+      allEvents = await this.meta.getPastEvents(
+        "allEvents", {fromBlock: 0 }
+      );
+      events = allEvents.filter((ev) => ev.returnValues.upc == upc);
       if (events) {
         $("#ftc-events").text("");
 
@@ -419,7 +481,7 @@ const App = {
         });
       }
     }catch(error) {
-      console.log("fetchPastEvents: ",error);
+      console.log("fetchPastItemEvents: ",error);
     }
   },
 
