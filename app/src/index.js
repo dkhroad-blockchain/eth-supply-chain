@@ -36,6 +36,7 @@ const App = {
       this.initSupplyChain();
       
     } catch (error) {
+      this.showToastError("Could not connect to contract or chain.",error);
       console.error("Could not connect to contract or chain.",error);
     }
   },

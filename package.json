@@ -4,18 +4,21 @@
   "description": "",
   "private": true,
   "scripts": {
-    "build": "webpack",
-    "dev": "webpack-dev-server"
+    "build": "webpack --config webpack.config.prod.js",
+    "start": "webpack-dev-server --open --config webpack.config.dev.js"
   },
   "devDependencies": {
     "clean-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^4.6.0",
     "css-loader": "^3.2.0",
+    "dotenv": "^8.0.0",
     "html-webpack-plugin": "^3.2.0",
     "style-loader": "^1.0.0",
+    "truffle": "^5.0.32",
     "webpack": "^4.28.1",
     "webpack-cli": "^3.2.1",
-    "webpack-dev-server": "^3.1.14"
+    "webpack-dev-server": "^3.1.14",
+    "webpack-merge": "^4.2.1"
   },
   "dependencies": {
     "web3": "^1.2.1"
