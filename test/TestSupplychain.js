@@ -37,6 +37,7 @@ contract('SupplyChain', function(accounts) {
       await supplyChain.addFarmer(originFarmerID);
       await supplyChain.addRetailer(retailerID);
       await supplyChain.addConsumer(consumerID);
+      await supplyChain.addDistributor(distributorID);
     });
 
     // 1st Test

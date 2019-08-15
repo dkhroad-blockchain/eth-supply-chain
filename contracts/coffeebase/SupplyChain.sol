@@ -204,7 +204,10 @@ contract SupplyChain is Ownable, AccessControl  {
   }
 
   // Define a function 'processtItem' that allows a farmer to mark an item 'Processed'
-  function processItem(uint _upc) public harvested(_upc) onlyItemOwnerOrOwner(_upc)
+  function processItem(uint _upc) 
+		public harvested(_upc) 
+		onlyItemOwnerOrOwner(_upc)
+		onlyFarmer
   {
     // Update the appropriate fields
     items[_upc].itemState = State.Processed;
@@ -218,7 +221,8 @@ contract SupplyChain is Ownable, AccessControl  {
   // Call modifier to check if upc has passed previous supply chain stage
     processed(_upc)
   // Call modifier to verify caller of this function
-   onlyItemOwnerOrOwner(_upc)
+		onlyItemOwnerOrOwner(_upc)
+		onlyFarmer
   {
     // Update the appropriate fields
     items[_upc].itemState = State.Packed;
@@ -232,6 +236,7 @@ contract SupplyChain is Ownable, AccessControl  {
   function sellItem(uint _upc, uint _price) public 
   // Call modifier to check if upc has passed previous supply chain stage
     packed(_upc)
+		onlyFarmer
   // Call modifier to verify caller of this function
     onlyItemOwnerOrOwner(_upc)
   {
@@ -252,7 +257,8 @@ contract SupplyChain is Ownable, AccessControl  {
     forSale(_upc)
     // Call modifer to check if buyer has paid enough
     paidEnough(items[_upc].productPrice)
-    
+		// Only distributors are allowed to buy
+		onlyDistributor
     // Call modifer to send any excess ether back to buyer
     checkValue(_upc)
   {
@@ -277,6 +283,9 @@ contract SupplyChain is Ownable, AccessControl  {
     // Call modifier to check if upc has passed previous supply chain stage
     sold(_upc)
      
+		// Only distributors are allowed to buy
+		onlyDistributor
+
     // Call modifier to verify caller of this function
     onlyItemOwnerOrOwner(_upc)
   {
