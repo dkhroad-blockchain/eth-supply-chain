@@ -18,9 +18,12 @@
  *
  */
 
-// const HDWallet = require('truffle-hdwallet-provider');
-// const infuraKey = "fj4jll3k.....";
-//
+const HDWalletProvider = require('truffle-hdwallet-provider');
+const RINKEBY_KEY = process.env.RINKEBY_KEY || "UnknownKey"; 
+const mnemonic = process.env.MNEMONIC || "";
+
+
+
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 
@@ -48,16 +51,21 @@ module.exports = {
      network_id: "*",       // Any network (default: none)
     },
 
-    local: {
-      port: 7545,
+    ganache: {
+      port: 7545,  // ganache GUI
       host: "127.0.0.1",
       network_id: 5777,
-      // gas: 8500000,           // Gas sent with each transaction (default: ~6700000)
-      // gasPrice: 20000000000,  // 20 gwei (in wei) (default: 100 gwei)
     },
-    develop: {
-      port: 8545
+
+    rinkeby: {
+      provider: () => new HDWalletProvider(mnemonic, `https://rinkeby.infura.io/v3/${RINKEBY_KEY}`),
+      network_id: 4,       // Rinkeby's id
+      gas: 5500000,        // Rinkeby has a lower block limit than mainnet
+      confirmations: 2,    // # of confs to wait between deployments. (default: 0)
+      timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
+      skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
     },
+
 
     // Another network with more advanced options...
     // advanced: {
