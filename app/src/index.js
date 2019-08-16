@@ -28,9 +28,12 @@ const App = {
 
       // get accounts
       const accounts = await web3.eth.getAccounts();
+      await this.setOwners(accounts);
+
+      $("#ftc_network_id").text(networkId);
+      $("#ftc_account_id").text(this.admin);
       await this.fetchPastRoleEvents();
       
-      await this.setOwners(accounts);
       this.setForm();
       this.readForm();
       this.initSupplyChain();
